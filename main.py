@@ -1,7 +1,7 @@
-import utils
+import libs.utils as utils
 from typing import Any
-from chronological import chronological
-from questions import multiple_choice, multiple_choice_flipped, flashcard
+from libs.chronological import chronological
+from libs.questions import multiple_choice, multiple_choice_flipped, flashcard
 
 #Flashcards
 #Enter key terms and definitions:
