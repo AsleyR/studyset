@@ -434,7 +434,7 @@ def check_match_answer(user_answer, options_dict_numeric, options_dict, study_di
         
         else:
             matches_wrong.append(f"{list[0]}{list[1]}")
-            right_matches.append(f"{list[0]}{get_dict_key(options_dict, answer)}")
+            right_matches.append(f"{list[0]}{get_dict_key(options_dict, study_dict[key])}")
     
     if matches_correct == TOTAL_POINTS:
         print("All correct! Good job.")
@@ -444,7 +444,8 @@ def check_match_answer(user_answer, options_dict_numeric, options_dict, study_di
         print("Incorrect matches:")
         for i in range(len(matches_wrong)):
             print(f"{matches_wrong[i]} should be {right_matches[i]}")
-
+        print()
+        
 def match(study_dict):
     """Manages the matching terms quiz version of any given study set."""
     # Set up Question
