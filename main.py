@@ -7,7 +7,7 @@ from libs.questions import multiple_choice, multiple_choice_flipped, flashcard
 # If you need help finding everything, let me know!
 # - Asley
 
-# Global variables
+# Global Constants
 NEWEST_DICT: dict[Any, Any] = {}
 ACCEPTED_USER_INPUTS: list[str] = ['q', 'c', 's', 'r', 'mcqdef', 
                         'mcqkey', 'selectall', 'selectall', 
