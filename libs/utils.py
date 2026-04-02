@@ -258,6 +258,7 @@ def print_menu(file_name = ""):
     print("=" * NUMBER_OF_LINES, "\n")
     print("Press 'c' to create a study set.")
     print("Press 's' to save a created study set to a csv file.")
+    print("Press 'e' to edit a study set you have loaded.")
     print("Press 'r' to read a study set from a csv file.")
 
     print("Press 'exit' to quit.")
@@ -271,10 +272,25 @@ def enter_data():
     key = input("Input key term: ")
     
     while key != 'done':
+
+        # Initialize choice and check if key in dictionary.
+        if key in entry_dict:
+            choice = existing_term_handling(entry_dict, key)
+        else:
+            choice = "o"
+        
         definition_list = [] 
         def_input = ""
 
         while True:
+            # Existing term handling of delete and skip.
+            if choice == "del":
+                del entry_dict[key]
+                break
+
+            if choice == "skip":
+                break
+
             # Allows user to enter all related definitions for the key term.
             def_input = input("Input definition(s) of key term or 'f' to finish this term: ")
 
@@ -283,14 +299,50 @@ def enter_data():
 
             definition_list.append(def_input)
 
-        # Updates study set dictionary and allows user to enter next key term.
-        entry_dict[key] = definition_list
+        # Updates study set dictionary and allows user to enter next key terms.
+        if choice == "add":
+            entry_dict[key].extend(definition_list)
+        
+        if choice == "o":
+            entry_dict[key] = definition_list
+
         key = input("Input key term: ")
     
     # Gets user to name dictionary for score saving purposes.
     study_set_name = input("Enter temporary name for study set: ")
     
     return entry_dict, study_set_name
+
+def existing_term_handling(entry_dict, key):
+    """
+    Handles existing terms which the user attempts to enter again. Asks user if they would
+    like to overwrite the original entry, delete it, add to it, or continue.
+
+    Parameters:
+        entry_dict (dict[str: str | list [str]]): dictionary being created.
+        key (str): the key which is repeated and must be edited.
+    
+    Returns:
+        choice (str): "o" if user wishes to overwrite previous entry, "del" if user
+        wishes to delete previous entry, "skip" if user doesn't want to do anything,
+        or "add" if user wants to add to previous entry.
+
+    """
+    # Print existing key to alert user to error.
+    print(f"{key}:")
+    
+    if len(entry_dict[key]) > 1:
+        print("\n    ".join(entry_dict[key]))
+    
+    else:
+        print(entry_dict[key][0])
+    
+    print("This term is already in study set.")
+    choice = input("Enter 'o' to overwrite the existing entry.\n"\
+                   "Enter 'del' to delete the existing entry.\n"\
+                    "Enter 'skip' to enter a new, different key term.\n"\
+                    "Enter 'add' to add to the existing entry: ")
+    return choice
 
 # ================= Other / Misc. =======================================================
 
@@ -331,6 +383,7 @@ def ask_to_save_score(study_set_name, section, score):
                        " to return to the main menu: ")
     if user_input == "y":
         save_score(study_set_name, section, score)
+
 
 def reformat_scores_list(list):
     """
@@ -508,3 +561,126 @@ def ask_to_read_score():
             read_all_scores(study_set_name)
             input("Press any key to continue / return to the main menu...")
             break
+
+#================================ Dictionary Editing Functions =================================================
+
+def print_alpha_from_list(list):
+    for i in range(len(list)):
+        print(chr(ord("A") + i), end = "")
+        print(":", list[i])
+
+def get_dict_key_from_index(index, string_input, study_dict):
+    term_index = int(string_input)
+    validate_edit_term(index, term_index)
+    term = study_dict.keys()[term_index]
+    return term
+
+def validate_edit_term(index, term_index):
+    if term_index < index - 8 or term_index > index + 1:
+        raise ValueError
+
+def delete_term_or_definition(study_dict, index):
+    while True:
+        try:
+            user_input = input("Enter term or definition to be deleted in the following format:\n" \
+                            "1 for term 1, 1A for term 1 definition A: ").strip().upper()
+            
+            # Remove entire term with all its definitions
+            if len(user_input) == 1:
+                term = get_dict_key_from_index(user_input, study_dict)
+                del study_dict[term]
+                                
+            # Remove a specified definition from a specific term.
+            elif len(user_input) == 2:
+                term = get_dict_key_from_index(user_input[0], study_dict)
+                definition_index = ord(user_input[1].upper()) - ord("A")
+                study_dict[term].pop(definition_index)
+            
+            break # Exit True loop if all is accomplished
+                                
+        except:
+            input("Invalid input. Press any key to try again...")
+
+def modify_term(study_dict, index):
+    # Identify the term to be changed and the new wording.
+    while True:
+        try:
+            term_index = int(input("Enter the number of the term you would like to change: ")) - 1
+            if term_index > index + 1 or term_index < index - 8:
+                raise ValueError
+            break
+
+        except ValueError:
+            print("Invalid term index. Please enter a valid number.")
+
+    new_term = input("Please enter the new key term for this definition: ")
+
+    # Find the definition, which must be added to the entry of the new term.
+    old_term = study_dict.keys()[term_index]
+    definition = study_dict[old_term]
+                    
+    # Delete old term and replace with new term and same definition.
+    del study_dict[old_term]
+    study_dict[new_term] = definition
+
+
+def modify_def(study_dict):
+    """Modifies a specific definition line for a certain term in the dictionary."""
+    while True:
+
+        try:
+            raw_input = input("Enter the term number and definition letter to be changed (eg. 1A): ")
+                            
+            # Find term and definition index to be able to access the edited location.
+            term_index = int(raw_input[0])
+            key = study_dict.keys()[term_index]
+            definition_index = ord(raw_input[1].upper()) - ord("A")
+
+            # Update this section of the definition
+            new_definition = input("Enter the new definition: ")
+            study_dict[key][definition_index] = new_definition
+            break
+
+        except:
+            print("Invalid entry. Please try again.")
+
+
+def modify_study_set(study_dict):
+    """Modifies study dict in place upon user's request."""
+    
+    print("Warning: if using chronological mode, do NOT modify the dictionary.")
+    
+    for index, key in enumerate(study_dict):
+        
+        # Print the 10 terms to preview.
+        print(f"{index + 1}: {key}")
+        print_alpha_from_list(study_dict[key])
+        print("-" * 79)
+
+        # Begin process every 10 entries or so.
+        if (index + 1) % 10 == 0 or index == len(study_dict) - 1:
+            should_continue = True
+            
+            while should_continue:
+                user_choice = input("Would you like to modify anything?\n" \
+                "Enter 'term' to modify a key term or 'def' to modify a definition or" \
+                "'del' to delete a term or 'n' to continue: ")
+
+                if user_choice == "term":
+                    modify_term(study_dict)
+                
+                elif user_choice == "def":
+                    modify_def(study_dict)
+
+                elif user_choice == "del":
+                    delete_term_or_definition(study_dict)
+
+                elif user_choice == "n":
+                    should_continue = False
+        
+            clear_console()
+    
+    # Ask user to save updated study set.
+    user_save = input("Would you like to save the updated dictionary? (y/n): ")
+    if user_save == "y":
+        save_data_to_csv(study_dict)
