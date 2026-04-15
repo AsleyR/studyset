@@ -12,7 +12,7 @@ import os
 # Global Constants
 NEWEST_DICT: dict[Any, Any] = {}
 ACCEPTED_USER_INPUTS: list[str] = ['exit', 'c', 's', 'r', 'mcqdef', 
-                        'mcqkey', 'selectall',
+                        'mcqkey', 'selectall', 'e',
                         'w', 'm', 'fc', 'chr', 'readscore']
 
 # Main program loop
@@ -38,6 +38,9 @@ def main():
             elif user_input == 's' and check_file_loaded(is_file_loaded):
                 study_set_name, file_name = utils.save_data_to_csv(NEWEST_DICT)
                 NEWEST_DICT = utils.read_data_from_csv(os.path.join("test_files", file_name.split(os.path.sep)[-1]))[0] # TUPLE SLICED!
+
+            elif user_input == 'e' and check_file_loaded(is_file_loaded):
+                utils.modify_study_set(NEWEST_DICT)
 
             elif user_input == 'r':
                 file_name = input("Input name of csv to read with extension: ")
@@ -77,7 +80,7 @@ def main():
 
         # Re-print the menu
         utils.clear_console()
-        if is_file_loaded:
+        if is_file_loaded and study_set_name != None:
             utils.print_menu(study_set_name.split(os.path.sep)[-1]) # Get last item when spliting abs path
         else:
             utils.print_menu()
